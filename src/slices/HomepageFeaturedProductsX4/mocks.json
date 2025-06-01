@@ -1,0 +1,41 @@
+[
+	{
+		"__TYPE__": "SharedSliceContent",
+		"variation": "default",
+		"primary": {
+			"product": {
+				"key": "2aae262c-8770-45d3-9675-03c5ec0d2bd8",
+				"__TYPE__": "LinkContent",
+				"value": {
+					"__TYPE__": "DocumentLink",
+					"id": "mock_document_id"
+				}
+			},
+			"product_2": {
+				"key": "f4168725-51b0-46d2-8c35-e203417a3a43",
+				"__TYPE__": "LinkContent",
+				"value": {
+					"__TYPE__": "DocumentLink",
+					"id": "mock_document_id"
+				}
+			},
+			"product_3": {
+				"key": "3d22ffc1-24a4-4aaa-b3fd-0c5598258d53",
+				"__TYPE__": "LinkContent",
+				"value": {
+					"__TYPE__": "DocumentLink",
+					"id": "mock_document_id"
+				}
+			},
+			"product_4": {
+				"__TYPE__": "LinkContent",
+				"key": "127c955e-2ff5-43a2-aa34-7de7a66ed169",
+				"value": {
+					"__TYPE__": "DocumentLink",
+					"id": "mock_document_id"
+				}
+			}
+		},
+		"items": []
+	}
+]

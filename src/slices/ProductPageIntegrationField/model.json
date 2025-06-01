@@ -1,0 +1,25 @@
+{
+  "id": "product_page_integration_field",
+  "type": "SharedSlice",
+  "name": "ProductPageIntegrationField",
+  "description": "ProductPageIntegrationField",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": "",
+      "primary": {
+        "product": {
+          "type": "IntegrationFields",
+          "config": {
+            "catalog": "shopify-integration-v1--prismic_2",
+            "label": "Product"
+          }
+        }
+      }
+    }
+  ]
+}

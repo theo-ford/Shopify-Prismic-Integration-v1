@@ -1,0 +1,63 @@
+{
+  "id": "homepage_featured_products_x4",
+  "type": "SharedSlice",
+  "name": "HomepageFeaturedProductsX4",
+  "description": "HomepageFeaturedProductsX4",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": "",
+      "primary": {
+        "product": {
+          "type": "Link",
+          "config": {
+            "label": "Product 1",
+            "select": "document",
+            "repeat": false,
+            "customtypes": [
+              "product"
+            ]
+          }
+        },
+        "product_2": {
+          "type": "Link",
+          "config": {
+            "label": "Product 2",
+            "select": "document",
+            "repeat": false,
+            "customtypes": [
+              "product"
+            ]
+          }
+        },
+        "product_3": {
+          "type": "Link",
+          "config": {
+            "label": "Product 3",
+            "select": "document",
+            "repeat": false,
+            "customtypes": [
+              "product"
+            ]
+          }
+        },
+        "product_4": {
+          "type": "Link",
+          "config": {
+            "label": "Product 4",
+            "select": "document",
+            "repeat": false,
+            "customtypes": [
+              "product"
+            ]
+          }
+        }
+      },
+      "items": {}
+    }
+  ]
+}

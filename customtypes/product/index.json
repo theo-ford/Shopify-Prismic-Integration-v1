@@ -1,0 +1,57 @@
+{
+  "format": "custom",
+  "id": "product",
+  "label": "Product",
+  "repeatable": true,
+  "status": true,
+  "json": {
+    "Main": {
+      "uid": {
+        "type": "UID",
+        "config": {
+          "label": "UID"
+        }
+      },
+      "shopify_product": {
+        "type": "IntegrationFields",
+        "config": {
+          "catalog": "shopify-integration-v1--prismic_2",
+          "label": "Shopify Product"
+        }
+      },
+      "price": {
+        "type": "Number",
+        "config": {
+          "label": "Price",
+          "placeholder": ""
+        }
+      },
+      "title": {
+        "type": "Text",
+        "config": {
+          "label": "Title",
+          "placeholder": ""
+        }
+      },
+      "image": {
+        "type": "Image",
+        "config": {
+          "label": "Image",
+          "constraint": {},
+          "thumbnails": []
+        }
+      },
+      "slices": {
+        "type": "Slices",
+        "fieldset": "Slice Zone",
+        "config": {
+          "choices": {
+            "product_page_integration_field": {
+              "type": "SharedSlice"
+            }
+          }
+        }
+      }
+    }
+  }
+}
