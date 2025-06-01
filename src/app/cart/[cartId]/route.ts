@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/lib/shopify";
 import { gql } from "graphql-request";
+import type { NextRequestWithParams } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  context: { params: { cartId: string } }
-) {
+  context: NextRequestWithParams<{ cartId: string }>
+): Promise<NextResponse> {
   const { cartId } = context.params;
 
   const query = gql`
