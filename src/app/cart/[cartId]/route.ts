@@ -1,4 +1,3 @@
-// src/app/api/shopify/cart/[cartId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/lib/shopify";
 import { gql } from "graphql-request";
