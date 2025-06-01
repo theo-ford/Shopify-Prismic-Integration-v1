@@ -6,7 +6,7 @@ import { gql } from "graphql-request";
 export async function GET(
   request: NextRequest,
   { params }: { params: { cartId: string } }
-) {
+): Promise<NextResponse> {
   const { cartId } = params;
 
   const query = gql`
