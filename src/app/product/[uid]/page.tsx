@@ -8,8 +8,6 @@ import { components } from "@/slices";
 // import { PrismicNextLink } from "@prismicio/next";
 // import Link from "next/link";
 
-type Params = { uid: string };
-
 /**
  * This page renders a Prismic Document dynamically based on the URL.
  */
@@ -30,11 +28,14 @@ type Params = { uid: string };
 //   };
 // }
 
-export default async function Page({ params }: { params: Params }) {
+export default async function Page({
+  params
+}: {
+  params: Promise<{ uid: string }>;
+}) {
+  const { uid } = await params;
   const client = createClient();
-  const page = await client
-    .getByUID("product", params.uid)
-    .catch(() => notFound());
+  const page = await client.getByUID("product", uid).catch(() => notFound());
 
   return (
     <>
