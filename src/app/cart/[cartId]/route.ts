@@ -1,10 +1,10 @@
 // src/app/api/shopify/cart/[cartId]/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/lib/shopify";
 import { gql } from "graphql-request";
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { cartId: string } }
 ) {
   const { cartId } = params;
