@@ -1,6 +1,85 @@
 // src/lib/shopify.ts
 import { GraphQLClient, gql } from "graphql-request";
 
+interface CartLine {
+  id: string;
+  merchandise: {
+    __typename: "ProductVariant";
+    title: string;
+    price: {
+      amount: string;
+      currencyCode: string;
+    };
+    product: {
+      title: string;
+    };
+  };
+  quantity: number;
+}
+
+interface Cart {
+  id: string;
+  checkoutUrl: string;
+  lines: {
+    edges: Array<{
+      node: CartLine;
+    }>;
+  };
+}
+
+interface CartResponse {
+  cartLinesAdd?: {
+    cart: Cart;
+  };
+  cartCreate?: {
+    cart: Cart;
+  };
+}
+
+interface ProductVariant {
+  id: string;
+  price: {
+    amount: string;
+    currencyCode: string;
+  };
+  availableForSale: boolean;
+}
+
+interface ProductImage {
+  originalSrc: string;
+  altText: string;
+}
+
+interface Product {
+  id: string;
+  title: string;
+  description: string;
+  priceRange: {
+    minVariantPrice: {
+      amount: string;
+      currencyCode: string;
+    };
+  };
+  images: {
+    edges: Array<{
+      node: ProductImage;
+    }>;
+  };
+  variants: {
+    edges: Array<{
+      node: ProductVariant;
+    }>;
+  };
+}
+
+interface ProductsResponse {
+  products: {
+    edges: Array<{
+      node: Product;
+    }>;
+  };
+}
+
 const client = new GraphQLClient(
   `https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/api/2024-01/graphql.json`,
   {
@@ -12,7 +91,7 @@ const client = new GraphQLClient(
 );
 
 export { client, gql };
-export const getProducts = async () => {
+export const getProducts = async (): Promise<Product[]> => {
   const query = gql`
     query {
       products(first: 100) {
@@ -53,12 +132,10 @@ export const getProducts = async () => {
     }
   `;
 
-  const data = await client.request(query);
+  const data = await client.request<ProductsResponse>(query);
   return data.products.edges.map((edge) => edge.node);
 };
 
-// src/lib/shopify.ts
-// src/lib/shopify.ts
 export const createCart = async (variantId: string, quantity: number = 1) => {
   const existingCartId = localStorage.getItem("shopifyCartId");
 
@@ -69,7 +146,10 @@ export const createCart = async (variantId: string, quantity: number = 1) => {
     // If cart exists, update it with the new product
     const query = gql`
       mutation {
-        cartLinesAdd(cartId: "${existingCartId}", lines: [{merchandiseId: "${variantId}", quantity: ${quantity}}]) {
+        cartLinesAdd(
+          cartId: "${existingCartId}",
+          lines: [{merchandiseId: "${variantId}", quantity: ${quantity}}]
+        ) {
           cart {
             id
             checkoutUrl
@@ -97,54 +177,68 @@ export const createCart = async (variantId: string, quantity: number = 1) => {
         }
       }
     `;
-    const result = await client.request(query);
-    console.log("Add to cart result:", JSON.stringify(result, null, 2));
-    return { cart: result.cartLinesAdd.cart };
+    const result = await client.request<CartResponse>(query);
+    if (result.cartCreate?.cart) {
+      return { cart: result.cartCreate.cart };
+    }
+    throw new Error("Failed to add product to existing cart");
   } else {
     // If no cart exists, create a new one
     const query = gql`
-      mutation {
-        cartCreate(input: {
-          lines: [{merchandiseId: "${variantId}", quantity: ${quantity}}]
-        }) {
-          cart {
-            id
-            checkoutUrl
-            lines(first: 10) {
-              edges {
-                node {
-                  id
-                  merchandise {
-                    ... on ProductVariant {
+    mutation {
+      cartCreate(input: {
+        lines: [{merchandiseId: "${variantId}", quantity: ${quantity}}]
+      }) {
+        cart {
+          id
+          checkoutUrl
+          lines(first: 10) {
+            edges {
+              node {
+                id
+                merchandise {
+                  ... on ProductVariant {
+                    title
+                    price {
+                      amount
+                      currencyCode
+                    }
+                    product {
                       title
-                      price {
-                        amount
-                        currencyCode
-                      }
-                      product {
-                        title
-                      }
                     }
                   }
-                  quantity
                 }
+                quantity
               }
             }
           }
         }
       }
-    `;
-    const result = await client.request(query);
-    console.log("Create cart result:", JSON.stringify(result, null, 2));
-    return { cart: result.cartCreate.cart };
+    }
+  `;
+    const result = await client.request<CartResponse>(query);
+    if (result.cartCreate?.cart) {
+      localStorage.setItem("shopifyCartId", result.cartCreate.cart.id);
+      return { cart: result.cartCreate.cart };
+    }
+    throw new Error("Failed to create new cart");
   }
 };
+
+interface CheckoutLineItemsReplaceResponse {
+  checkoutLineItemsReplace: {
+    checkout: {
+      id: string;
+      webUrl: string;
+    };
+  };
+}
 
 export const updateCheckout = async (
   checkoutId: string,
   variantId: string,
   quantity: number
-) => {
+): Promise<{ checkout: { id: string; webUrl: string } }> => {
   const query = gql`
     mutation {
       checkoutLineItemsReplace(
@@ -158,20 +252,77 @@ export const updateCheckout = async (
       }
     }
   `;
-  const data = await client.request(query);
-  return data.checkoutLineItemsReplace;
+  const data = await client.request<CheckoutLineItemsReplaceResponse>(query);
+  return { checkout: data.checkoutLineItemsReplace.checkout };
 };
 
-// src/lib/shopify.ts
+interface CartLinesUpdateResponse {
+  cartLinesUpdate: {
+    cart: Cart;
+  };
+}
+
 export const updateCart = async (
   cartId: string,
-  lineId: string,
+  lineId: string | null,
+  variantId: string,
   quantity: number
-) => {
-  const cleanCartId = cartId.replace("gid://shopify/Cart/", "");
-  const query = gql`
+): Promise<{ cart: Cart }> => {
+  if (lineId) {
+    const mutationQuery = gql`
+      mutation {
+        cartLinesUpdate(
+          cartId: "${cartId}",
+          lines: [{
+            id: "${lineId}",
+            quantity: ${quantity}
+          }]
+        ) {
+          cart {
+            id
+            checkoutUrl
+            lines(first: 10) {
+              edges {
+                node {
+                  id
+                  merchandise {
+                    ... on ProductVariant {
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                      product {
+                        title
+                      }
+                    }
+                  }
+                  quantity
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const data = await client.request<CartLinesUpdateResponse>(mutationQuery);
+    if (data.cartLinesUpdate?.cart) {
+      return { cart: data.cartLinesUpdate.cart };
+    }
+    throw new Error("Failed to update cart line");
+  }
+
+  // If no lineId, we're adding a new line
+  const mutationQuery = gql`
     mutation {
-      cartLinesUpdate(cartId: "gid://shopify/Cart/${cleanCartId}", lines: [{id: "${lineId}", quantity: ${quantity}}]) {
+      cartLinesAdd(
+        cartId: "${cartId}",
+        lines: [{
+          merchandiseId: "${variantId}",
+          quantity: ${quantity}
+        }]
+      ) {
         cart {
           id
           checkoutUrl
@@ -200,15 +351,27 @@ export const updateCart = async (
     }
   `;
 
-  const data = await client.request(query);
-  return data.cartLinesUpdate;
+  const data = await client.request<CartResponse>(mutationQuery);
+  if (data.cartLinesAdd?.cart) {
+    return { cart: data.cartLinesAdd.cart };
+  }
+  throw new Error("Failed to add cart line");
 };
 
-export const removeLine = async (cartId: string, lineId: string) => {
-  const cleanCartId = cartId.replace("gid://shopify/Cart/", "");
+interface CartLinesRemoveResponse {
+  cartLinesRemove: {
+    cart: Cart;
+  };
+}
+
+export const removeLine = async (
+  cartId: string,
+  variantId: string,
+  lineId: string
+) => {
   const query = gql`
     mutation {
-      cartLinesRemove(cartId: "gid://shopify/Cart/${cleanCartId}", lineIds: ["${lineId}"]) {
+      cartLinesRemove(cartId: "${cartId}", lineIds: ["${lineId}"]) {
         cart {
           id
           checkoutUrl
@@ -237,6 +400,6 @@ export const removeLine = async (cartId: string, lineId: string) => {
     }
   `;
 
-  const data = await client.request(query);
-  return data.cartLinesRemove;
+  const data = await client.request<CartLinesRemoveResponse>(query);
+  return data.cartLinesRemove.cart;
 };

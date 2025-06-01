@@ -2,6 +2,37 @@
 import { NextResponse } from "next/server";
 import { createCart } from "@/lib/shopify";
 
+interface CartUserError {
+  message: string;
+  field: string[];
+}
+
+interface CartResponse {
+  cartUserErrors: CartUserError[];
+  cart?: {
+    id: string;
+    checkoutUrl: string;
+    lines: {
+      edges: Array<{
+        node: {
+          id: string;
+          merchandise: {
+            title: string;
+            price: {
+              amount: string;
+              currencyCode: string;
+            };
+            product: {
+              title: string;
+            };
+          };
+          quantity: number;
+        };
+      }>;
+    };
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const { variantId, quantity = 1 } = await request.json();
@@ -15,7 +46,7 @@ export async function POST(request: Request) {
 
     console.log("Creating cart for variant:", variantId);
 
-    const result = await createCart(variantId, quantity);
+    const result = (await createCart(variantId, quantity)) as CartResponse;
     console.log("Cart creation result:", JSON.stringify(result, null, 2));
 
     if (result.cartUserErrors && result.cartUserErrors.length > 0) {

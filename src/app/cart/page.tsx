@@ -106,7 +106,9 @@ export default function CartPage() {
             </div>
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => handleQuantityChange(line.id, line.quantity - 1)}
+                onClick={() =>
+                  handleQuantityChange(line.id as string, line.quantity - 1)
+                }
                 disabled={line.quantity === 1}
                 className="px-2 py-1 bg-gray-200 rounded disabled:opacity-50"
               >
@@ -114,7 +116,9 @@ export default function CartPage() {
               </button>
               <span>{line.quantity}</span>
               <button
-                onClick={() => handleQuantityChange(line.id, line.quantity + 1)}
+                onClick={() =>
+                  handleQuantityChange(line.id as string, line.quantity + 1)
+                }
                 className="px-2 py-1 bg-gray-200 rounded"
               >
                 +
@@ -131,12 +135,12 @@ export default function CartPage() {
       </div>
 
       <div className="mt-8">
-        <a
-          href={cart.checkoutUrl}
+        <Link
+          href={cart.checkoutUrl || "/"}
           className="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          Proceed to Checkout
-        </a>
+          {cart.checkoutUrl ? "Proceed to Checkout" : "Cart Empty"}
+        </Link>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { PrismicPreview } from "@prismicio/next";
 import { repositoryName } from "@/prismicio";
 import "@/app/globals.css";
 import { CartProvider } from "@/contexts/CartContext";
-import { CartIcon } from "@/components/CartIcon";
+import Nav from "@/components/Nav";
 
 export default function RootLayout({
   children
@@ -16,7 +16,7 @@ export default function RootLayout({
       </head>
       <CartProvider>
         <body>
-          <CartIcon />
+          <Nav />
           {children}
         </body>
       </CartProvider>
