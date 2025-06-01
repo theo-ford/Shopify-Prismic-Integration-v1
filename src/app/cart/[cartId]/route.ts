@@ -5,9 +5,9 @@ import { gql } from "graphql-request";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { cartId: string } }
-): Promise<NextResponse> {
-  const { cartId } = params;
+  context: { params: { cartId: string } }
+) {
+  const { cartId } = context.params;
 
   const query = gql`
     query {
