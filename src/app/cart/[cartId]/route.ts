@@ -42,6 +42,7 @@ export async function GET(
     const data = await client.request(query);
     return NextResponse.json(data);
   } catch (error) {
+    console.error("Failed to fetch cart data:", error);
     return NextResponse.json(
       { error: "Failed to fetch cart data" },
       { status: 500 }
