@@ -1,6 +1,8 @@
 import { FC } from "react";
-import { Content, ImageFieldImage } from "@prismicio/client";
+// import { Content, ImageFieldImage } from "@prismicio/client";
+import { Content } from "@prismicio/client";
 import { SliceComponentProps } from "@prismicio/react";
+// import { isFilled, Content } from "@prismicio/client";
 // import { PrismicNextImage } from "@prismicio/next";
 // import styles from "./index.module.css";
 // import { createClient } from "@/prismicio";
