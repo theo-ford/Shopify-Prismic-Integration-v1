@@ -2,36 +2,36 @@
 import { NextResponse } from "next/server";
 import { createCart } from "@/lib/shopify";
 
-interface CartUserError {
-  message: string;
-  field: string[];
-}
+// interface CartUserError {
+//   message: string;
+//   field: string[];
+// }
 
-interface CartResponse {
-  cartUserErrors: CartUserError[];
-  cart?: {
-    id: string;
-    checkoutUrl: string;
-    lines: {
-      edges: Array<{
-        node: {
-          id: string;
-          merchandise: {
-            title: string;
-            price: {
-              amount: string;
-              currencyCode: string;
-            };
-            product: {
-              title: string;
-            };
-          };
-          quantity: number;
-        };
-      }>;
-    };
-  };
-}
+// interface CartResponse {
+//   cartUserErrors: CartUserError[];
+//   cart?: {
+//     id: string;
+//     checkoutUrl: string;
+//     lines: {
+//       edges: Array<{
+//         node: {
+//           id: string;
+//           merchandise: {
+//             title: string;
+//             price: {
+//               amount: string;
+//               currencyCode: string;
+//             };
+//             product: {
+//               title: string;
+//             };
+//           };
+//           quantity: number;
+//         };
+//       }>;
+//     };
+//   };
+// }
 
 export async function POST(request: Request) {
   try {
@@ -46,16 +46,16 @@ export async function POST(request: Request) {
 
     console.log("Creating cart for variant:", variantId);
 
-    const result = (await createCart(variantId, quantity)) as CartResponse;
+    const result = await createCart(variantId, quantity);
     console.log("Cart creation result:", JSON.stringify(result, null, 2));
 
-    if (result.cartUserErrors && result.cartUserErrors.length > 0) {
+    if (!result.cart) {
       return NextResponse.json(
         {
-          error: result.cartUserErrors[0].message,
-          details: result.cartUserErrors[0].field
+          error: "No cart data returned",
+          result
         },
-        { status: 400 }
+        { status: 500 }
       );
     }
 
