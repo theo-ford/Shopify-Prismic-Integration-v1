@@ -11,7 +11,7 @@ export default async function Home() {
   const home = await client.getByUID("page", "home");
 
   // <SliceZone> renders the page's slices.
-
+  console.log("2025-12-06 16:23:00");
   return (
     <>
       <p>app/page.tsx</p>
